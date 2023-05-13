@@ -3,7 +3,6 @@ import model.Producte;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 
 public interface ProducteDAO {
     public void createProducte(Producte p) throws SQLException;
