@@ -11,9 +11,13 @@ public class ProducteDAO_MySQL implements ProducteDAO {
     private static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String DB_ROUTE = "jdbc:mysql://localhost:3306/expenedora";
     private static final String DB_USER = "root";
-    private static final String DB_PWD = "1234";
+    protected static final String DB_PWD = "1234";
+    private static final String STATEMENT_SELECT_ONE_ITEM = "SELECT * FROM producte WHERE codi_producte=?";
     private static final String STATEMENT_SELECT_ALL = "SELECT * FROM producte";
     private static final String STATEMENT_INSERT = "INSERT INTO producte VALUES (?,?,?,?,?)";
+    private static final String STATEMENT_DELETE = "DELETE FROM producte WHERE codi_producte=?";
+    private static final String STATEMENT_UDPATE = "UPDATE producte SET codi_producte=?, nom=?, descripcio=?, " +
+            "preu_compra=?, preu_venta=? WHERE codi_producte=?";
 
 
     public ProducteDAO_MySQL() {
@@ -41,7 +45,20 @@ public class ProducteDAO_MySQL implements ProducteDAO {
     }
 
     @Override
-    public Producte readProducte() throws SQLException {
+    public Producte readProducte(String codiProducte) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement(STATEMENT_SELECT_ONE_ITEM);
+        ps.setString(1, codiProducte);
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            Producte p = new Producte();
+            p.setCodiProducte(rs.getString("codi_producte"));
+            p.setNom(rs.getString("nom"));
+            p.setDescripcio(rs.getString("descripcio"));
+            p.setPreuCompra(rs.getFloat("preu_compra"));
+            p.setPreuVenta(rs.getFloat("preu_venta"));
+            return p;
+        }
         return null;
     }
 
@@ -64,11 +81,20 @@ public class ProducteDAO_MySQL implements ProducteDAO {
 
     @Override
     public void updateProducte(Producte p) throws SQLException {
-
+        PreparedStatement ps = conn.prepareStatement(STATEMENT_UDPATE);
+        ps.setString(1, p.getNom());
+        ps.setString(2, p.getDescripcio());
+        ps.setFloat(3, p.getPreuCompra());
+        ps.setFloat(4, p.getPreuVenta());
+        ps.setString(5, p.getCodiProducte());
+        int rowCount = ps.executeUpdate();
     }
 
     @Override
     public Producte deleteProducte(Producte p) throws SQLException {
-        return null;
+        PreparedStatement ps = conn.prepareStatement(STATEMENT_DELETE);
+        ps.setString(1, p.getCodiProducte());
+        int rowCount = ps.executeUpdate();
+        return p;
     }
 }
