@@ -1,6 +1,5 @@
 package daos;
 
-import model.Producte;
 import model.Slot;
 
 import java.sql.*;

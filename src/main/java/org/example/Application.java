@@ -2,7 +2,10 @@ package org.example;
 
 import daos.ProducteDAO;
 import daos.ProducteDAO_MySQL;
+import daos.SlotDAO;
+import daos.SlotDAO_MySQL;
 import model.Producte;
+import model.Slot;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -10,7 +13,8 @@ import java.util.Scanner;
 
 public class Application {
 
-    private static ProducteDAO producteDAO = new ProducteDAO_MySQL();            //TODO: passar a una classe DAOFactory
+    private static ProducteDAO producteDAO = new ProducteDAO_MySQL();
+    private static SlotDAO slotDao = new SlotDAO_MySQL();//TODO: passar a una classe DAOFactory
 
     public static void main(String[] args) {
 
@@ -139,6 +143,23 @@ public class Application {
          * 3            Coca-Cola Zero          10
          * 4            Aigua 0.5L              7
          */
+        ArrayList<Slot> slots;
+        try {
+            slots = slotDao.readSlots();
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+            return;
+        }
+
+        try {
+            for (Slot slot : slots) {
+                Producte producte = producteDAO.readProducte(slot.getCodiProducte());
+                System.out.printf("%d   %s  %d\n", slot.getPosicio(), producte.getNom(), slot.getQuantitat());
+            }
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
+
     }
 
     private static void mostrarMenu() {
