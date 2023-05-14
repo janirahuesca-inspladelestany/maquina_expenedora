@@ -8,7 +8,6 @@ import utils.Stdin;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -111,8 +110,8 @@ public class Application {
         Slot slot2;
 
         try {
-            slot1 = slotDao.readSlot(positionSlot1);
-            slot2 = slotDao.readSlot(positionSlot2);
+            slot1 = slotDAO.readSlot(positionSlot1);
+            slot2 = slotDAO.readSlot(positionSlot2);
         } catch (SQLException exception) {
             System.out.println("No existeix aquest slot!");
             exception.printStackTrace();
@@ -122,12 +121,12 @@ public class Application {
         try {
             positionAux = slot1.getPosicio();
             slot1.setPosicio(0);
-            slotDao.updateSlot(slot1);
+            slotDAO.updateSlot(slot1);
 
             slot1.setPosicio(slot2.getPosicio());
             slot2.setPosicio(positionAux);
-            slotDao.updateSlot(slot1);
-            slotDao.updateSlot(slot2);
+            slotDAO.updateSlot(slot1);
+            slotDAO.updateSlot(slot2);
         } catch (SQLException exception) {
             exception.printStackTrace();
         }
@@ -147,7 +146,7 @@ public class Application {
         }
 
         try {
-            slot = slotDao.readSlot(position);
+            slot = slotDAO.readSlot(position);
         } catch (SQLException exception) {
             exception.printStackTrace();
             return;
@@ -156,7 +155,7 @@ public class Application {
         slot.setQuantitat(stock);
 
         try {
-            slotDao.updateSlot(slot);
+            slotDAO.updateSlot(slot);
         } catch (SQLException exception) {
             exception.printStackTrace();
         }
@@ -298,7 +297,7 @@ public class Application {
 
         // Llegint slot de la base de dades
         try {
-            slot = slotDao.readSlot(posicio);
+            slot = slotDAO.readSlot(posicio);
             if (slot == null) {
                 System.out.printf("No hi ha un slot a la posicio: %d\n", posicio);
                 return;
@@ -318,7 +317,7 @@ public class Application {
 
         // Actualitzant slot
         try {
-            slotDao.updateSlot(slot);
+            slotDAO.updateSlot(slot);
         } catch (SQLException exception) {
             exception.printStackTrace();
         }
@@ -355,7 +354,7 @@ public class Application {
          */
         ArrayList<Slot> slots;
         try {
-            slots = slotDao.readSlots();
+            slots = slotDAO.readSlots();
         } catch (SQLException exception) {
             exception.printStackTrace();
             return;
