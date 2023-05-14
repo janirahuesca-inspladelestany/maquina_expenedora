@@ -8,18 +8,37 @@ import model.Producte;
 import model.Slot;
 import utils.Stdin;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Application {
 
-    private static ProducteDAO producteDAO = new ProducteDAO_MySQL();
-    private static SlotDAO slotDao = new SlotDAO_MySQL();//TODO: passar a una classe DAOFactory
+    private static ProducteDAO producteDAO;
+    private static Connection conn;
+    private static SlotDAO slotDao;//TODO: passar a una classe DAOFactory
     private static double benefici = 0;
     private static ArrayList<Producte> productesComprats = new ArrayList<>();
+    private static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
+    private static final String DB_ROUTE = "jdbc:mysql://localhost:3306/expenedora";
+    private static final String DB_USER = "root";
+    private static final String DB_PWD = "1234";
 
     public static void main(String[] args) {
+        try {
+            Class.forName(DB_DRIVER); // Carreguem el driver
+            conn = DriverManager.getConnection(DB_ROUTE, DB_USER, DB_PWD); // Arranquem la connexió a la BDD
+            System.out.println("Connexió establerta satisfactòriament.");
+        } catch (Exception e) {
+            System.out.println("S'ha produït un error en intentar connectar amb la base de dades. Revisa els paràmetres.");
+            System.out.println(e);
+            return;
+        }
+
+        slotDao = new SlotDAO_MySQL(conn);
+        producteDAO = new ProducteDAO_MySQL(conn);
 
         Scanner lector = new Scanner(System.in);            //TODO: passar Scanner a una classe InputHelper
         int opcio = 0;

@@ -6,7 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 
 public class SlotDAO_MySQL implements SlotDAO {
-    private Connection conn = null; // o podríem tenir la referència a la Connection pool
+    private Connection conn; // o podríem tenir la referència a la Connection pool
     private static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String DB_ROUTE = "jdbc:mysql://localhost:3306/expenedora";
     private static final String DB_USER = "root";
@@ -18,15 +18,8 @@ public class SlotDAO_MySQL implements SlotDAO {
     private static final String STATEMENT_UDPATE = "UPDATE slot SET quantitat=?, codi_producte=?" +
             "WHERE posicio =?";
 
-    public SlotDAO_MySQL() {
-        try {
-            Class.forName(DB_DRIVER); // Carreguem el driver
-            conn = DriverManager.getConnection(DB_ROUTE, DB_USER, DB_PWD); // Arranquem la connexió a la BDD
-            System.out.println("Connexió establerta satisfactòriament.");
-        } catch (Exception e) {
-            System.out.println("S'ha produït un error en intentar connectar amb la base de dades. Revisa els paràmetres.");
-            System.out.println(e);
-        }
+    public SlotDAO_MySQL(Connection connection) {
+        conn = connection;
     }
 
     @Override

@@ -7,11 +7,7 @@ import java.util.ArrayList;
 
 public class ProducteDAO_MySQL implements ProducteDAO {
 
-    private Connection conn = null; // o podríem tenir la referència a la Connection pool
-    private static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
-    private static final String DB_ROUTE = "jdbc:mysql://localhost:3306/expenedora";
-    private static final String DB_USER = "root";
-    protected static final String DB_PWD = "1234";
+    private Connection conn; // o podríem tenir la referència a la Connection pool
     private static final String STATEMENT_SELECT_ONE_ITEM = "SELECT * FROM producte WHERE codi_producte=?";
     private static final String STATEMENT_SELECT_ALL = "SELECT * FROM producte";
     private static final String STATEMENT_INSERT = "INSERT INTO producte VALUES (?,?,?,?,?)";
@@ -20,15 +16,8 @@ public class ProducteDAO_MySQL implements ProducteDAO {
             "preu_compra=?, preu_venta=? WHERE codi_producte=?";
 
 
-    public ProducteDAO_MySQL() {
-        try {
-            Class.forName(DB_DRIVER); // Carreguem el driver
-            conn = DriverManager.getConnection(DB_ROUTE, DB_USER, DB_PWD); // Arranquem la connexió a la BDD
-            System.out.println("Connexió establerta satisfactòriament.");
-        } catch (Exception e) {
-            System.out.println("S'ha produït un error en intentar connectar amb la base de dades. Revisa els paràmetres.");
-            System.out.println(e);
-        }
+    public ProducteDAO_MySQL(Connection connection) {
+        conn = connection;
     }
 
     @Override
