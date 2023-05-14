@@ -83,16 +83,14 @@ public class Application {
          *     Podeu fer-ho amb llenguatge SQL o mirant si el producte existeix i després inserir o actualitzar
          */
 
-        String codi = Stdin.input("""
+        System.out.println("""
                 DADES PRODUCTE:
-                ===============
-                - Codi producte:
-         """);
-
-        String nom= Stdin.input("Nom:");
-        String descripcio = Stdin.input("Descripció:");
-        Float preuCompra = (float) Stdin.inputDouble("Preu compra");
-        Float preuVenda = (float) Stdin.inputDouble("Preu venda");
+                ===============""");
+        String codi = Stdin.input("- Codi producte: ");
+        String nom= Stdin.input("- Nom: ");
+        String descripcio = Stdin.input("- Descripció: ");
+        float preuCompra = (float) Stdin.inputDouble("- Preu compra: ");
+        float preuVenda = (float) Stdin.inputDouble("- Preu venda: ");
 
         Producte p = new Producte(codi, nom, descripcio, preuCompra, preuVenda);
 
@@ -105,7 +103,7 @@ public class Application {
             return;
         }
 
-        if (producteLlegit == null) {
+        if (producteLlegit != null) {
             System.out.println("""
                     Producte ja existent. Què vols fer?
                     """);
