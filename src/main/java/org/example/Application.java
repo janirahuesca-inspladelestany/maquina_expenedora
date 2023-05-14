@@ -16,8 +16,6 @@ public class Application {
     private static ProducteDAO producteDAO;
     private static SlotDAO slotDao;//TODO: passar a una classe DAOFactory
     private static BeneficisDAO beneficisDAO;
-    private static double benefici = 0;
-    private static ArrayList<Producte> productesComprats = new ArrayList<>();
     private static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String DB_ROUTE = "jdbc:mysql://localhost:3306/expenedora";
     private static final String DB_USER = "root";
@@ -227,7 +225,12 @@ public class Application {
             exception.printStackTrace();
             return;
         }
-        benefici += producteComprat.getPreuVenta() - producteComprat.getPreuCompra();
+        float benefici = producteComprat.getPreuVenta() - producteComprat.getPreuCompra();
+        try {
+            beneficisDAO.afegirBenefici(benefici);
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
     }
 
     private static void mostrarMaquina() {
@@ -300,6 +303,13 @@ public class Application {
          * llarg de la vida de la màquina.
          */
 
+        float benefici;
+        try {
+            benefici = beneficisDAO.obtenirBeneficis();
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+            return;
+        }
         System.out.printf("El benefici es de: %.2f\n", benefici);
     }
 }
