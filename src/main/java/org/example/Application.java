@@ -1,9 +1,6 @@
 package org.example;
 
-import daos.ProducteDAO;
-import daos.ProducteDAO_MySQL;
-import daos.SlotDAO;
-import daos.SlotDAO_MySQL;
+import daos.*;
 import model.Producte;
 import model.Slot;
 import utils.Stdin;
@@ -15,10 +12,10 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Application {
-
-    private static ProducteDAO producteDAO;
     private static Connection conn;
+    private static ProducteDAO producteDAO;
     private static SlotDAO slotDao;//TODO: passar a una classe DAOFactory
+    private static BeneficisDAO beneficisDAO;
     private static double benefici = 0;
     private static ArrayList<Producte> productesComprats = new ArrayList<>();
     private static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
@@ -39,6 +36,7 @@ public class Application {
 
         slotDao = new SlotDAO_MySQL(conn);
         producteDAO = new ProducteDAO_MySQL(conn);
+        beneficisDAO = new BeneficisDAO_MySQL(conn);
 
         Scanner lector = new Scanner(System.in);            //TODO: passar Scanner a una classe InputHelper
         int opcio = 0;
