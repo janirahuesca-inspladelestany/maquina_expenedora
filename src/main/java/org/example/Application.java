@@ -84,6 +84,31 @@ public class Application {
          *      - modificar stock d'un producte que hi ha a la màquina
          *      - afegir més ranures a la màquina
          */
+
+        int opcio = Stdin.inputInt("""
+                MODIFICAR MAQUINA:
+                ===============
+                1. Modificar posicions
+                2. Modificar stock
+                3. Afegir slots""");
+
+        switch (opcio) {
+            case 1 -> modificarPosicions();
+            case 2 -> modificarStock();
+            case 3 -> afegirSlots();
+            default -> System.out.println("Opcio no valida");
+        }
+    }
+
+    private static void modificarPosicions() {
+
+    }
+
+    private static void modificarStock() {
+
+    }
+    private static void afegirSlots() {
+
     }
 
     private static void afegirProductes() {
