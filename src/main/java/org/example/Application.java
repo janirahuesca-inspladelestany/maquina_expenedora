@@ -146,6 +146,20 @@ public class Application {
             exception.printStackTrace();
             return;
         }
+        if (slot.getQuantitat() < 1) {
+            System.out.println("No hi ha stock disponible.");
+            return;
+        }
+        slot.setQuantitat(slot.getQuantitat()-1);
+
+        try {
+            slotDao.updateSlot(slot);
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
+        System.out.println("Venda realitzada correctament.");
+
+
     }
 
     private static void mostrarMaquina() {
