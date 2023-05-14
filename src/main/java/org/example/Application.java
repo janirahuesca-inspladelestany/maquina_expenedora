@@ -134,7 +134,30 @@ public class Application {
     }
 
     private static void modificarStock() {
+        mostrarMaquina();
+        int position = Stdin.inputInt("Introdueix el primer slot: ");
+        Slot slot;
 
+        int stock = Stdin.inputInt("Introdueix el nou stock: ");
+        if (stock < 1) {
+            System.out.println("El stock no es valid");
+            return;
+        }
+
+        try {
+            slot = slotDao.readSlot(position);
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+            return;
+        }
+
+        slot.setQuantitat(stock);
+
+        try {
+            slotDao.updateSlot(slot);
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
     }
     private static void afegirSlots() {
 
