@@ -101,7 +101,36 @@ public class Application {
     }
 
     private static void modificarPosicions() {
+        mostrarMaquina();
+        int positionSlot1 = Stdin.inputInt("Introdueix el primer slot: ");
+        int positionSlot2 = Stdin.inputInt("Introdueix el segon slot: ");
+        int positionAux;
+        Slot slot1;
+        Slot slot2;
 
+        try {
+            slot1 = slotDao.readSlot(positionSlot1);
+            slot2 = slotDao.readSlot(positionSlot2);
+        } catch (SQLException exception) {
+            System.out.println("No existeix aquest slot!");
+            exception.printStackTrace();
+            return;
+        }
+
+        try {
+            positionAux = slot1.getPosicio();
+            slot1.setPosicio(0);
+            slotDao.updateSlot(slot1);
+
+            slot1.setPosicio(slot2.getPosicio());
+            slot2.setPosicio(positionAux);
+            slotDao.updateSlot(slot1);
+            slotDao.updateSlot(slot2);
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
+
+        System.out.println("Posicions intercanviades correctament");
     }
 
     private static void modificarStock() {
