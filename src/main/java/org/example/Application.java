@@ -83,10 +83,48 @@ public class Application {
          *     Podeu fer-ho amb llenguatge SQL o mirant si el producte existeix i després inserir o actualitzar
          */
 
-        //Exemple de inserció SENSE ENTRADA DE DADES NI COMPROVACIÓ REPETITS
+        String codi = Stdin.input("""
+                DADES PRODUCTE:
+                ===============
+                - Codi producte:
+         """);
 
-        Producte p = new Producte("pomaP", "Pink Lady", "Poma Pink Lady envasada",
-                0.2f, 1.0f);
+        String nom= Stdin.input("Nom:");
+        String descripcio = Stdin.input("Descripció:");
+        Float preuCompra = (float) Stdin.inputDouble("Preu compra");
+        Float preuVenda = (float) Stdin.inputDouble("Preu venda");
+
+        Producte p = new Producte(codi, nom, descripcio, preuCompra, preuVenda);
+
+        Producte producteLlegit;
+
+        try {
+            producteLlegit = producteDAO.readProducte(codi);
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+            return;
+        }
+
+        if (producteLlegit == null) {
+            System.out.println("""
+                    Producte ja existent. Què vols fer?
+                    """);
+            int opcio = Stdin.inputInt("""
+                    1 - Actualitzar
+                    2 - Descartar canvis
+                    """);
+
+            if (opcio == 2) {
+                return;
+            }
+
+            try {
+                producteDAO.updateProducte(p);
+            } catch (SQLException exception) {
+                exception.printStackTrace();
+            }
+            return;
+        }
 
         try {
             //Demanem de guardar el producte p a la BD
