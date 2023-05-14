@@ -72,7 +72,7 @@ public class ProducteDAO_MySQL implements ProducteDAO {
             p.setCodiProducte(rs.getString("codi_producte")); // Carrego les dades al ResultSet
             p.setNom(rs.getString("nom"));
             p.setDescripcio(rs.getString("descripcio"));
-            p.setPreuCompra(rs.getFloat("preu_copmra"));
+            p.setPreuCompra(rs.getFloat("preu_compra"));
             p.setPreuVenta(rs.getFloat("preu_venta"));
             llistaProductes.add(p); // Afegeixo el producte a la llista
         }
