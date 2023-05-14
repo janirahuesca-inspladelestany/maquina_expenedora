@@ -8,13 +8,15 @@ import utils.Stdin;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Application {
     private static Connection conn;
     private static ProducteDAO producteDAO;
-    private static SlotDAO slotDao;//TODO: passar a una classe DAOFactory
+
+    private static SlotDAO slotDAO;//TODO: passar a una classe DAOFactory
     private static BeneficisDAO beneficisDAO;
     private static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String DB_ROUTE = "jdbc:mysql://localhost:3306/expenedora";
@@ -32,7 +34,7 @@ public class Application {
             return;
         }
 
-        slotDao = new SlotDAO_MySQL(conn);
+        slotDAO = new SlotDAO_MySQL(conn);
         producteDAO = new ProducteDAO_MySQL(conn);
         beneficisDAO = new BeneficisDAO_MySQL(conn);
 
@@ -108,7 +110,35 @@ public class Application {
 
     }
     private static void afegirSlots() {
+        System.out.println("""
+                DADES SLOT A AFEGIR:
+                ====================
+                """);
+        int posicio = Stdin.inputInt("- Posició: ");
+        int quantitat = Stdin.inputInt("- Quantitat (unitats x producte): ");
+        String codi_producte = Stdin.input("Codi producte: ");
 
+        Slot s = new Slot(posicio, quantitat, codi_producte);
+
+        Slot slotLlegit;
+
+        try {
+            slotLlegit = slotDAO.readSlot(posicio);
+        } catch (SQLException exception){
+            exception.printStackTrace();
+            return;
+        }
+
+        if (slotLlegit != null) {
+            System.out.println("Aquest slot ja existeix.");
+            return;
+        }
+
+        try {
+            slotDAO.createSlot(s);
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
     }
 
     private static void afegirProductes() {
