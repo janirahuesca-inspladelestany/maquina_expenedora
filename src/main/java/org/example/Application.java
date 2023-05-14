@@ -141,7 +141,6 @@ public class Application {
                 System.out.printf("No hi ha un slot a la posicio: %d\n", posicio);
                 return;
             }
-            System.out.println(slot);
         } catch (SQLException exception) {
             exception.printStackTrace();
             return;
