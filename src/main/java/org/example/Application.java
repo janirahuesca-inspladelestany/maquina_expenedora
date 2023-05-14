@@ -40,44 +40,50 @@ public class Application {
         Scanner lector = new Scanner(System.in);            //TODO: passar Scanner a una classe InputHelper
         int opcio = 0;
 
+
         do {
-            mostrarMenu();
-            opcio = lector.nextInt();
+            try {
+                mostrarMenu();
+                opcio = lector.nextInt();
 
-            switch (opcio) {
-                case 1:
-                    mostrarMaquina();
-                    break;
-                case 2:
-                    comprarProducte();
-                    break;
+                switch (opcio) {
+                    case 1:
+                        mostrarMaquina();
+                        break;
+                    case 2:
+                        comprarProducte();
+                        break;
 
-                case 10:
-                    mostrarInventari();
-                    break;
-                case 11:
-                    afegirProductes();
-                    break;
-                case 12:
-                    modificarMaquina();
-                    break;
-                case 13:
-                    mostrarBenefici();
-                    break;
-
-                case -1:
-                    System.out.println("Bye...");
-                    break;
-                default:
-                    System.out.println("Opció no vàlida");
+                    case 10:
+                        mostrarInventari();
+                        break;
+                    case 11:
+                        afegirProductes();
+                        break;
+                    case 12:
+                        modificarMaquina();
+                        break;
+                    case 13:
+                        mostrarBenefici();
+                        break;
+                    case -1:
+                        System.out.println("Bye...");
+                        break;
+                    default:
+                        System.out.println("Opció no vàlida");
+                }
+            } catch (ApplicationError error) {
+                System.out.println(error.message);
+            } catch (Exception exception) {
+                System.out.println("Unexpected exception");
+                exception.printStackTrace();
+                return;
             }
-
         } while (opcio != -1);
-
     }
 
 
-    private static void modificarMaquina() {
+    private static void modificarMaquina() throws ApplicationError {
 
         /**
          * Ha de permetre:
@@ -101,7 +107,7 @@ public class Application {
         }
     }
 
-    private static void modificarPosicions() {
+    private static void modificarPosicions() throws ApplicationError {
         mostrarMaquina();
         int positionSlot1 = Stdin.inputInt("Introdueix el primer slot: ");
         int positionSlot2 = Stdin.inputInt("Introdueix el segon slot: ");
@@ -134,7 +140,7 @@ public class Application {
         System.out.println("Posicions intercanviades correctament");
     }
 
-    private static void modificarStock() {
+    private static void modificarStock() throws ApplicationError {
         mostrarMaquina();
         int position = Stdin.inputInt("Introdueix el primer slot: ");
         Slot slot;
@@ -160,6 +166,7 @@ public class Application {
             exception.printStackTrace();
         }
     }
+
     private static void afegirSlots() {
         System.out.println("""
                 DADES SLOT A AFEGIR:
@@ -175,7 +182,7 @@ public class Application {
 
         try {
             slotLlegit = slotDAO.readSlot(posicio);
-        } catch (SQLException exception){
+        } catch (SQLException exception) {
             exception.printStackTrace();
             return;
         }
@@ -192,7 +199,7 @@ public class Application {
         }
     }
 
-    private static void afegirProductes() {
+    private static void afegirProductes() throws ApplicationError {
 
         /**
          *      Crear un nou producte amb les dades que ens digui l'operari
@@ -263,7 +270,7 @@ public class Application {
         }
     }
 
-    private static void mostrarInventari() {
+    private static void mostrarInventari() throws ApplicationError {
 
         try {
             //Agafem tots els productes de la BD i els mostrem
@@ -277,7 +284,7 @@ public class Application {
         }
     }
 
-    private static void comprarProducte() {
+    private static void comprarProducte() throws ApplicationError {
 
         /**
          * Mínim: es realitza la compra indicant la posició on es troba el producte que es vol comprar
@@ -332,14 +339,10 @@ public class Application {
             return;
         }
         float benefici = producteComprat.getPreuVenta() - producteComprat.getPreuCompra();
-        try {
-            beneficisDAO.afegirBenefici(benefici);
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
+        beneficisDAO.afegirBenefici(benefici);
     }
 
-    private static void mostrarMaquina() {
+    private static void mostrarMaquina() throws ApplicationError {
 
         /** IMPORTANT **
          * S'està demanat NOM DEL PRODUCTE no el codiProducte (la taula Slot conté posició, codiProducte i stock)
@@ -392,7 +395,7 @@ public class Application {
         System.out.println("[-1] Sortir de l'aplicació");
     }
 
-    private static void mostrarBenefici() {
+    private static void mostrarBenefici() throws ApplicationError {
 
         /** Ha de mostrar el benefici de la sessió actual de la màquina, cada producte té un cost de compra
          * i un preu de venda. La suma d'aquesta diferència de tots productes que s'han venut ens donaran el benefici.
@@ -409,13 +412,7 @@ public class Application {
          * llarg de la vida de la màquina.
          */
 
-        float benefici;
-        try {
-            benefici = beneficisDAO.obtenirBeneficis();
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-            return;
-        }
+        float benefici = beneficisDAO.obtenirBeneficis();
         System.out.printf("El benefici es de: %.2f\n", benefici);
     }
 }

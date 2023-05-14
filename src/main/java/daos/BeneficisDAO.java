@@ -3,6 +3,6 @@ package daos;
 import java.sql.SQLException;
 
 public interface BeneficisDAO {
-    public void afegirBenefici(float benefici) throws SQLException;
-    public float obtenirBeneficis() throws SQLException;
+    public void afegirBenefici(float benefici) throws InfrastructureError;
+    public float obtenirBeneficis() throws InfrastructureError;
 }
