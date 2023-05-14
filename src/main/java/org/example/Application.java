@@ -16,6 +16,8 @@ public class Application {
 
     private static ProducteDAO producteDAO = new ProducteDAO_MySQL();
     private static SlotDAO slotDao = new SlotDAO_MySQL();//TODO: passar a una classe DAOFactory
+    private static double benefici = 0;
+    private static ArrayList<Producte> productesComprats = new ArrayList<>();
 
     public static void main(String[] args) {
 
@@ -87,7 +89,7 @@ public class Application {
                 DADES PRODUCTE:
                 ===============""");
         String codi = Stdin.input("- Codi producte: ");
-        String nom= Stdin.input("- Nom: ");
+        String nom = Stdin.input("- Nom: ");
         String descripcio = Stdin.input("- Descripció: ");
         float preuCompra = (float) Stdin.inputDouble("- Preu compra: ");
         float preuVenda = (float) Stdin.inputDouble("- Preu venda: ");
@@ -168,9 +170,11 @@ public class Application {
         // Mostrant a l'usuari els productes disponibles
         mostrarMaquina();
 
+        // Demanant a l'usuari per un slot
         int posicio = Stdin.inputInt("Introdueix la posicio del producte que vols comprar: ");
         Slot slot;
 
+        // Llegint slot de la base de dades
         try {
             slot = slotDao.readSlot(posicio);
             if (slot == null) {
@@ -181,12 +185,16 @@ public class Application {
             exception.printStackTrace();
             return;
         }
+
+        // Comprovant que hi ha productes a aquest slot
         if (slot.getQuantitat() < 1) {
             System.out.println("No hi ha stock disponible.");
             return;
         }
-        slot.setQuantitat(slot.getQuantitat()-1);
+        // Reduint estoc
+        slot.setQuantitat(slot.getQuantitat() - 1);
 
+        // Actualitzant slot
         try {
             slotDao.updateSlot(slot);
         } catch (SQLException exception) {
@@ -194,7 +202,15 @@ public class Application {
         }
         System.out.println("Venda realitzada correctament.");
 
-
+        // Afegint producte comprat al llistat
+        Producte producteComprat;
+        try {
+            producteComprat = producteDAO.readProducte(slot.getCodiProducte());
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+            return;
+        }
+        benefici += producteComprat.getPreuVenta() - producteComprat.getPreuCompra();
     }
 
     private static void mostrarMaquina() {
@@ -266,5 +282,7 @@ public class Application {
          * S'ha de crear una nova taula a la BD on es vagi realitzant un registre de les vendes o els beneficis al
          * llarg de la vida de la màquina.
          */
+
+        System.out.printf("El benefici es de: %.2f\n", benefici);
     }
 }
