@@ -6,8 +6,8 @@ public class BeneficisDAO_MySQL implements BeneficisDAO {
 
     private Connection conn;
 
-    private static final String STATEMENT_SUM_BENEFICIS = "SELECT SUM(beneficis) AS beneficis FROM beneficis";
-    private static final String STATEMENT_INSERT = "INSERT INTO beneficis VALUES (?)";
+    private static final String STATEMENT_SUM_BENEFICIS = "SELECT SUM(beneficis) AS beneficis FROM benefici";
+    private static final String STATEMENT_INSERT = "INSERT INTO benefici VALUES (?)";
 
 
     public BeneficisDAO_MySQL(Connection connection) {
