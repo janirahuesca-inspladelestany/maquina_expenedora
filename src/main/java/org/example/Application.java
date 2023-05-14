@@ -6,6 +6,7 @@ import daos.SlotDAO;
 import daos.SlotDAO_MySQL;
 import model.Producte;
 import model.Slot;
+import utils.Stdin;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -128,6 +129,23 @@ public class Application {
          * (stock de la màquina es manté guardat entre reinicis del programa)
          */
 
+        // Mostrant a l'usuari els productes disponibles
+        mostrarMaquina();
+
+        int posicio = Stdin.inputInt("Introdueix la posicio del producte que vols comprar: ");
+        Slot slot;
+
+        try {
+            slot = slotDao.readSlot(posicio);
+            if (slot == null) {
+                System.out.printf("No hi ha un slot a la posicio: %d\n", posicio);
+                return;
+            }
+            System.out.println(slot);
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+            return;
+        }
     }
 
     private static void mostrarMaquina() {
