@@ -15,7 +15,7 @@ public class SlotDAO_MySQL implements SlotDAO {
     private static final String STATEMENT_SELECT_ALL = "SELECT * FROM slot";
     private static final String STATEMENT_INSERT = "INSERT INTO slot VALUES (?,?,?)";
     private static final String STATEMENT_DELETE = "DELETE FROM SLOT WHERE posicio=?";
-    private static final String STATEMENT_UDPATE = "UPDATE slot SET posicio=?, quantitat=?, codi_producte=?" +
+    private static final String STATEMENT_UDPATE = "UPDATE slot SET quantitat=?, codi_producte=?" +
             "WHERE posicio =?";
 
     public SlotDAO_MySQL() {
@@ -74,9 +74,9 @@ public class SlotDAO_MySQL implements SlotDAO {
     @Override
     public void updateSlot(Slot s) throws SQLException {
         PreparedStatement ps = conn.prepareStatement(STATEMENT_UDPATE);
-        ps.setInt(1, s.getPosicio());
-        ps.setInt(2, s.getQuantitat());
-        ps.setString(3, s.getCodiProducte());
+        ps.setInt(1, s.getQuantitat());
+        ps.setString(2, s.getCodiProducte());
+        ps.setInt(3, s.getPosicio());
         int rowCount = ps.executeUpdate();
     }
 
