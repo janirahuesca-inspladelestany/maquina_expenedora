@@ -1,10 +1,16 @@
 package org.example;
 
-import daos.*;
-import model.Producte;
-import model.Slot;
-import utils.Stdin;
-
+import benefici.BeneficisDAO;
+import benefici.BeneficisDAO_MySQL;
+import producte.Producte;
+import shared.ApplicationError;
+import shared.InfrastructureError;
+import slot.Slot;
+import producte.ProducteDAO;
+import producte.ProducteDAO_MySQL;
+import slot.SlotDAO;
+import slot.SlotDAO_MySQL;
+import shared.utils.Stdin;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -109,35 +115,25 @@ public class Application {
 
     private static void modificarPosicions() throws ApplicationError {
         mostrarMaquina();
-        int positionSlot1 = Stdin.inputInt("Introdueix el primer slot: ");
-        int positionSlot2 = Stdin.inputInt("Introdueix el segon slot: ");
-        int positionAux;
+        int posicioSlot1 = Stdin.inputInt("Introdueix el primer slot: ");
+        int posicioSlot2 = Stdin.inputInt("Introdueix el segon slot: ");
+        int posicioAux;
         Slot slot1;
         Slot slot2;
 
-        try {
-            slot1 = slotDAO.readSlot(positionSlot1);
-            slot2 = slotDAO.readSlot(positionSlot2);
-        } catch (SQLException exception) {
-            System.out.println("No existeix aquest slot!");
-            exception.printStackTrace();
-            return;
-        }
+        slot1 = slotDAO.readSlot(posicioSlot1);
+        slot2 = slotDAO.readSlot(posicioSlot2);
 
-        try {
-            positionAux = slot1.getPosicio();
-            slot1.setPosicio(0);
-            slotDAO.updateSlot(slot1);
+        posicioAux = slot1.getPosicio();
+        slot1.setPosicio(0);
+        slotDAO.updateSlot(slot1);
 
-            slot1.setPosicio(slot2.getPosicio());
-            slot2.setPosicio(positionAux);
-            slotDAO.updateSlot(slot1);
-            slotDAO.updateSlot(slot2);
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
+        slot1.setPosicio(slot2.getPosicio());
+        slot2.setPosicio(posicioAux);
+        slotDAO.updateSlot(slot1);
+        slotDAO.updateSlot(slot2);
 
-        System.out.println("Posicions intercanviades correctament");
+        System.out.println("Posicions intercanviades correctament.");
     }
 
     private static void modificarStock() throws ApplicationError {
@@ -151,23 +147,14 @@ public class Application {
             return;
         }
 
-        try {
-            slot = slotDAO.readSlot(position);
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-            return;
-        }
+        slot = slotDAO.readSlot(position);
 
         slot.setQuantitat(stock);
 
-        try {
-            slotDAO.updateSlot(slot);
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
+        slotDAO.updateSlot(slot);
     }
 
-    private static void afegirSlots() {
+    private static void afegirSlots() throws InfrastructureError {
         System.out.println("""
                 DADES SLOT A AFEGIR:
                 ====================
@@ -180,26 +167,17 @@ public class Application {
 
         Slot slotLlegit;
 
-        try {
-            slotLlegit = slotDAO.readSlot(posicio);
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-            return;
-        }
+        slotLlegit = slotDAO.readSlot(posicio);
 
         if (slotLlegit != null) {
             System.out.println("Aquest slot ja existeix.");
             return;
         }
 
-        try {
-            slotDAO.createSlot(s);
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
+        slotDAO.createSlot(s);
     }
 
-    private static void afegirProductes() throws ApplicationError {
+    private static void afegirProductes() throws ApplicationError, SQLException {
 
         /**
          *      Crear un nou producte amb les dades que ens digui l'operari
@@ -226,12 +204,7 @@ public class Application {
 
         Producte producteLlegit;
 
-        try {
-            producteLlegit = producteDAO.readProducte(codi);
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-            return;
-        }
+        producteLlegit = producteDAO.readProducte(codi);
 
         if (producteLlegit != null) {
             System.out.println("""
@@ -246,41 +219,26 @@ public class Application {
                 return;
             }
 
-            try {
-                producteDAO.updateProducte(p);
-            } catch (SQLException exception) {
-                exception.printStackTrace();
-            }
-            return;
+            producteDAO.updateProducte(p);
         }
 
-        try {
-            //Demanem de guardar el producte p a la BD
-            producteDAO.createProducte(p);
+        //Demanem de guardar el producte p a la BD
+        producteDAO.createProducte(p);
 
-            //Agafem tots els productes de la BD i els mostrem (per comprovar que s'ha afegit)
-            ArrayList<Producte> productes = producteDAO.readProductes();
-            for (Producte prod : productes) {
-                System.out.println(prod);
-            }
+        //Agafem tots els productes de la BD i els mostrem (per comprovar que s'ha afegit)
+        ArrayList<Producte> productes = producteDAO.readProductes();
 
-        } catch (SQLException e) {          //TODO: tractar les excepcions
-            e.printStackTrace();
-            System.out.println(e.getErrorCode());
+        for (Producte prod : productes) {
+            System.out.println(prod);
         }
     }
 
     private static void mostrarInventari() throws ApplicationError {
 
-        try {
-            //Agafem tots els productes de la BD i els mostrem
-            ArrayList<Producte> productes = producteDAO.readProductes();
-            for (Producte prod : productes) {
-                System.out.println(prod);
-            }
-
-        } catch (SQLException e) {          //TODO: tractar les excepcions
-            e.printStackTrace();
+        //Agafem tots els productes de la BD i els mostrem
+        ArrayList<Producte> productes = producteDAO.readProductes();
+        for (Producte prod : productes) {
+            System.out.println(prod);
         }
     }
 
@@ -303,14 +261,9 @@ public class Application {
         Slot slot;
 
         // Llegint slot de la base de dades
-        try {
-            slot = slotDAO.readSlot(posicio);
-            if (slot == null) {
-                System.out.printf("No hi ha un slot a la posicio: %d\n", posicio);
-                return;
-            }
-        } catch (SQLException exception) {
-            exception.printStackTrace();
+        slot = slotDAO.readSlot(posicio);
+        if (slot == null) {
+            System.out.printf("No hi ha un slot a la posicio: %d\n", posicio);
             return;
         }
 
@@ -323,23 +276,16 @@ public class Application {
         slot.setQuantitat(slot.getQuantitat() - 1);
 
         // Actualitzant slot
-        try {
-            slotDAO.updateSlot(slot);
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
+        slotDAO.updateSlot(slot);
         System.out.println("Venda realitzada correctament.");
 
         // Afegint producte comprat al llistat
         Producte producteComprat;
-        try {
-            producteComprat = producteDAO.readProducte(slot.getCodiProducte());
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-            return;
-        }
+
+        producteComprat = producteDAO.readProducte(slot.getCodiProducte());
+
         float benefici = producteComprat.getPreuVenta() - producteComprat.getPreuCompra();
-        beneficisDAO.afegirBenefici(benefici);
+        beneficisDAO.createBenefici(benefici);
     }
 
     private static void mostrarMaquina() throws ApplicationError {
@@ -356,22 +302,13 @@ public class Application {
          * 4            Aigua 0.5L              7
          */
         ArrayList<Slot> slots;
-        try {
-            slots = slotDAO.readSlots();
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-            return;
-        }
 
-        try {
-            for (Slot slot : slots) {
-                Producte producte = producteDAO.readProducte(slot.getCodiProducte());
-                System.out.printf("%d   %s  %d\n", slot.getPosicio(), producte.getNom(), slot.getQuantitat());
-            }
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
+        slots = slotDAO.readSlots();
 
+        for (Slot slot : slots) {
+            Producte producte = producteDAO.readProducte(slot.getCodiProducte());
+            System.out.printf("%d   %s  %d\n", slot.getPosicio(), producte.getNom(), slot.getQuantitat());
+        }
     }
 
     private static void mostrarMenu() {
@@ -412,7 +349,7 @@ public class Application {
          * llarg de la vida de la màquina.
          */
 
-        float benefici = beneficisDAO.obtenirBeneficis();
+        float benefici = beneficisDAO.readBeneficis();
         System.out.printf("El benefici es de: %.2f\n", benefici);
     }
 }

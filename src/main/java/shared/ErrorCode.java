@@ -1,4 +1,4 @@
-package org.example;
+package shared;
 
 public enum ErrorCode {
     INFRASTRUCTURE_ERROR("001"),

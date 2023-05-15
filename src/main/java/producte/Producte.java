@@ -1,4 +1,4 @@
-package model;
+package producte;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,8 +7,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Slot {
-    private int posicio;
-    private int quantitat;
+public class Producte {
     private String codiProducte;
+    private String nom;
+    private String descripcio;
+    private float preuCompra;
+    private float preuVenta;
 }
+
+

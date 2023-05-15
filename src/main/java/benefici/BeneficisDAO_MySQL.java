@@ -1,6 +1,7 @@
-package daos;
+package benefici;
 
-import javax.naming.OperationNotSupportedException;
+import shared.InfrastructureError;
+
 import java.sql.*;
 
 public class BeneficisDAO_MySQL implements BeneficisDAO {
@@ -17,7 +18,7 @@ public class BeneficisDAO_MySQL implements BeneficisDAO {
 
 
     @Override
-    public void afegirBenefici(float benefici) throws InfrastructureError {
+    public void createBenefici(float benefici) throws InfrastructureError {
         try {
             PreparedStatement ps = conn.prepareStatement(STATEMENT_INSERT);
 
@@ -29,7 +30,7 @@ public class BeneficisDAO_MySQL implements BeneficisDAO {
     }
 
     @Override
-    public float obtenirBeneficis() throws InfrastructureError {
+    public float readBeneficis() throws InfrastructureError {
         try {
             PreparedStatement ps = conn.prepareStatement(STATEMENT_SUM_BENEFICIS);
             ResultSet rs = ps.executeQuery();  //Serveix per executar la consulta i guardar-la a un ResultSet que guarda un conjunt de dades
@@ -39,7 +40,7 @@ public class BeneficisDAO_MySQL implements BeneficisDAO {
             }
             return beneficis;
         } catch (SQLException exception) {
-            throw new InfrastructureError("Error obtenin beneficis de la base de dades");
+            throw new InfrastructureError("Error obtenint beneficis de la base de dades");
         }
     }
 }

@@ -1,4 +1,4 @@
-package utils;
+package shared.utils;
 
 public class Stdout {
     public static <T> void showArray(T[] list) {
