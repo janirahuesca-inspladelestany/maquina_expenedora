@@ -1,15 +1,13 @@
 package org.example;
 
 import benefici.BeneficisDAO;
-import benefici.BeneficisDAO_MySQL;
 import producte.Producte;
 import shared.ApplicationError;
+import shared.DAOFactory;
 import shared.InfrastructureError;
 import slot.Slot;
 import producte.ProducteDAO;
-import producte.ProducteDAO_MySQL;
 import slot.SlotDAO;
-import slot.SlotDAO_MySQL;
 import shared.utils.Stdin;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -19,9 +17,9 @@ import java.util.Scanner;
 
 public class Application {
     private static Connection conn;
+    private static DAOFactory daoFactory;
     private static ProducteDAO producteDAO;
-
-    private static SlotDAO slotDAO;//TODO: passar a una classe DAOFactory
+    private static SlotDAO slotDAO;
     private static BeneficisDAO beneficisDAO;
     private static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String DB_ROUTE = "jdbc:mysql://localhost:3306/expenedora";
@@ -39,13 +37,18 @@ public class Application {
             return;
         }
 
-        slotDAO = new SlotDAO_MySQL(conn);
+        // Inicialització dels DAO:
+        daoFactory = DAOFactory.getInstance();
+        producteDAO = DAOFactory.getInstance().getProducteDAO();
+        slotDAO = DAOFactory.getInstance().getSlotDAO();
+        beneficisDAO = DAOFactory.getInstance().getBeneficisDAO();
+
+        /*slotDAO = new SlotDAO_MySQL(conn);
         producteDAO = new ProducteDAO_MySQL(conn);
-        beneficisDAO = new BeneficisDAO_MySQL(conn);
+        beneficisDAO = new BeneficisDAO_MySQL(conn);*/
 
         Scanner lector = new Scanner(System.in);            //TODO: passar Scanner a una classe InputHelper
         int opcio = 0;
-
 
         do {
             try {
@@ -88,15 +91,153 @@ public class Application {
         } while (opcio != -1);
     }
 
+    /**
+     * Mètode que mostra la informació de la màquina (posició del slot, i nom i quantitat dels productes que conté).
+     * @throws ApplicationError
+     */
+    private static void mostrarMaquina() throws ApplicationError {
 
+        ArrayList<Slot> slots;
+
+        // Llegim la informació dels slots de la màquina:
+        slots = slotDAO.readSlots();
+
+        // Per cada slot, mostrem la informació (accedint al nom del producte gràcies a la creació i lectura del producte):
+        for (Slot slot : slots) {
+            Producte producte = producteDAO.readProducte(slot.getCodiProducte());
+            System.out.printf("%d\t%s\t%d\n", slot.getPosicio(), producte.getNom(), slot.getQuantitat());
+        }
+    }
+
+    /**
+     * Mètode que permet realitzar una compra indicant la posició on es troba el producte que es vol comprar.
+     * Quan s'ha venut un producte queda reflectit a la BD que n'hi ha un menys.
+     * @throws ApplicationError
+     */
+    private static void comprarProducte() throws ApplicationError {
+
+        // TODO: Ampliació (0.5 punts): es permet entrar el NOM del producte per seleccionar-lo (abans cal mostrar els productes disponibles a la màquina)
+
+        // Mostrem a l'usuari els productes disponibles:
+        mostrarMaquina();
+
+        // Demanem a l'usuari per un slot:
+        int posicio = Stdin.inputInt("Introdueix la posicio del producte que vols comprar: ");
+        Slot slot;
+
+        // Llegim el slot de la base de dades:
+        slot = slotDAO.readSlot(posicio);
+
+        // Ens assegurem que el slot existeix:
+        if (slot == null) {
+            System.out.printf("No hi ha un slot a la posicio: %d\n", posicio);
+            return;
+        }
+
+        // Comprovem que hi ha productes a aquest slot:
+        if (slot.getQuantitat() < 1) {
+            System.out.println("No hi ha stock disponible.");
+            return;
+        }
+
+        // Reduïm l'estoc del producte:
+        slot.setQuantitat(slot.getQuantitat() - 1);
+
+        // Actualitzem el slot (perquè quedi constància del nou estoc):
+        slotDAO.updateSlot(slot);
+        System.out.println("Venda realitzada correctament.");
+
+        // Afegim els beneficis obtinguts pel producte venut (preu venda - preu compra):
+        Producte producteComprat;
+
+        producteComprat = producteDAO.readProducte(slot.getCodiProducte());
+
+        float benefici = producteComprat.getPreuVenta() - producteComprat.getPreuCompra();
+        beneficisDAO.createBenefici(benefici);
+    }
+
+    /**
+     * Mètode que ens permet crear un nou producte amb les dades que ens digui l'operari, així com afegir el producte a
+     * la BD. Es tenen en compte les diferents situacions que poden passar:
+     * El producte ja existeix
+     * - Mostrar el producte que té el mateix codiProducte
+     * - Preguntar si es vol actualitzar o descartar l'operació
+     * El producte no existeix
+     * - Afegir el producte a la BD
+     * @throws ApplicationError
+     * @throws SQLException
+     */
+    private static void afegirProductes() throws ApplicationError, SQLException {
+
+        // Demanem els diferents camps que componen un producte:
+        System.out.println("""
+                DADES PRODUCTE:
+                ===============""");
+        String codi = Stdin.input("- Codi producte: ");
+        String nom = Stdin.input("- Nom: ");
+        String descripcio = Stdin.input("- Descripció: ");
+        float preuCompra = (float) Stdin.inputDouble("- Preu compra: ");
+        float preuVenda = (float) Stdin.inputDouble("- Preu venda: ");
+
+        // Creem un nou producte amb les dades sol·licitades:
+        Producte p = new Producte(codi, nom, descripcio, preuCompra, preuVenda);
+
+        // Creem un producte auxiliar i li assignem el valor del nou producte que hem creat
+        Producte producteLlegit;
+        producteLlegit = producteDAO.readProducte(codi);
+
+        // Comprovem si el sproducte que es vol crear ja existeix. ç
+        // Si ja existeix, informem a l'usuari i donem a triar dues opcions (actualitzar el producte o descartar els canvis):
+        if (producteLlegit != null) {
+            System.out.println("""
+                    Producte ja existent. Què vols fer?
+                    """);
+            int opcio = Stdin.inputInt("""
+                    1 - Actualitzar
+                    2 - Descartar canvis
+                    """);
+
+            // Si tria descartar els canvis, sortim del mètode:
+            if (opcio == 2) {
+                return;
+            }
+
+            // Si tria actualitzar el producte, realitzem la operació:
+            producteDAO.updateProducte(p);
+        }
+
+        // Guardem el producte p a la BD:
+        producteDAO.createProducte(p);
+
+        // Agafem tots els productes de la BD i els mostrem (per comprovar que s'ha afegit):
+        ArrayList<Producte> productes = producteDAO.readProductes();
+
+        for (Producte prod : productes) {
+            System.out.println(prod);
+        }
+    }
+
+    /**
+     * Mètode per mostrar la informació dels productes que tenim, i així conèixer l'inventari (productes i quantitat
+     * que tenim).
+     * @throws ApplicationError
+     */
+    private static void mostrarInventari() throws ApplicationError {
+
+        // Agafem tots els productes de la BD i els mostrem:
+        ArrayList<Producte> productes = producteDAO.readProductes();
+        for (Producte prod : productes) {
+            System.out.println(prod);
+        }
+    }
+
+    /**
+     * Mètode que permet modificar aspectes de la màquina expenedora. Per cadascun d'aquests aspectes s'han creat
+     * submètodes, un per cada funcionalitat. Es mostra a l'usuari les opcions que pot fer, i amb un switch s'assigna
+     * la opció triada per l'usuari al mètode corresponent.
+     * @throws ApplicationError
+     */
     private static void modificarMaquina() throws ApplicationError {
-
-        /**
-         * Ha de permetre:
-         *      - modificar les posicions on hi ha els productes de la màquina (quin article va a cada lloc)
-         *      - modificar stock d'un producte que hi ha a la màquina
-         *      - afegir més ranures a la màquina
-         */
 
         int opcio = Stdin.inputInt("""
                 MODIFICAR MAQUINA:
@@ -113,48 +254,86 @@ public class Application {
         }
     }
 
+    /**
+     * Mètode que permet modificar les posicions on hi ha els productes de la màquina (quin article va a cada lloc).
+     * @throws ApplicationError
+     */
     private static void modificarPosicions() throws ApplicationError {
+        // Mostrem informació de la màquina expenedora:
         mostrarMaquina();
+
+        // Demanem a l'usuari dues posicions (les que es volen intercanviar),
         int posicioSlot1 = Stdin.inputInt("Introdueix el primer slot: ");
         int posicioSlot2 = Stdin.inputInt("Introdueix el segon slot: ");
+
+        // Creem una posició auxiliar:
         int posicioAux;
+
         Slot slot1;
         Slot slot2;
 
+        // Llegim les dades que hi ha a cada slot:
         slot1 = slotDAO.readSlot(posicioSlot1);
         slot2 = slotDAO.readSlot(posicioSlot2);
 
+        // Assignem a posició auxiliar la posició que té el slot1:
         posicioAux = slot1.getPosicio();
+        // Al slot 1 li assignem la posició 0:
         slot1.setPosicio(0);
+        // Actualitzem el slot 1 amb les noves dades (posició 0):
         slotDAO.updateSlot(slot1);
 
+        // Al slot 1, li assignem la posició que té el slot 2:
         slot1.setPosicio(slot2.getPosicio());
+        // Al slot 2, li assignem la posició auxiliar (la inicial del slot 1):
         slot2.setPosicio(posicioAux);
+
+        // Actualitzem els dos slots amb les noves dades:
         slotDAO.updateSlot(slot1);
         slotDAO.updateSlot(slot2);
 
         System.out.println("Posicions intercanviades correctament.");
     }
 
+    /**
+     *  Mètode que permet modificar l'estoc d'un producte que hi ha a la màquina
+     * @throws ApplicationError
+     */
     private static void modificarStock() throws ApplicationError {
+
+        // Mostrem informació de la màquina expenedora:
         mostrarMaquina();
-        int position = Stdin.inputInt("Introdueix el primer slot: ");
+
+        // Demanem a l'usuari el eslot del qual vol modificar l'estoc:
+        int posicio = Stdin.inputInt("Introdueix el slot: ");
         Slot slot;
 
+        // Demanem a l'usuari el nou estoc que vol assignar al slot:
         int stock = Stdin.inputInt("Introdueix el nou stock: ");
+
+        // Si ens vol introduïr un valor menor a 1, mostrem un missatge i sortim del mètode
         if (stock < 1) {
-            System.out.println("El stock no es valid");
+            System.out.println("El stock no és valid");
             return;
         }
 
-        slot = slotDAO.readSlot(position);
+        // Si l'estoc introduït és vàlid, llegim el slot:
+        slot = slotDAO.readSlot(posicio);
 
+        // Li assignem la nova quantitat (estoc demanat):
         slot.setQuantitat(stock);
 
+        // Actualitzem la informació del slot:
         slotDAO.updateSlot(slot);
     }
 
+    /**
+     * Mètode que permet afegir més ranures (slots) a la màquina
+     * @throws InfrastructureError
+     */
     private static void afegirSlots() throws InfrastructureError {
+
+        // Demanem les dades dels diferents camps que composen un slot, i les assignem a les variables corresponents:
         System.out.println("""
                 DADES SLOT A AFEGIR:
                 ====================
@@ -163,173 +342,21 @@ public class Application {
         int quantitat = Stdin.inputInt("- Quantitat (unitats x producte): ");
         String codi_producte = Stdin.input("Codi producte: ");
 
+        // Creem un nou slot amb les dades sol·licitades:
         Slot s = new Slot(posicio, quantitat, codi_producte);
 
+        // Creem un slot auxiliar i li assignem el valor del nou slot que hem creat
         Slot slotLlegit;
-
         slotLlegit = slotDAO.readSlot(posicio);
 
+        // Comprovem si el slot que es vol crear ja existeix. Si ja existeix, informem a l'usuari i sortim del mètode.
         if (slotLlegit != null) {
             System.out.println("Aquest slot ja existeix.");
             return;
         }
 
+        // Si no existeix, creem el slot:
         slotDAO.createSlot(s);
-    }
-
-    private static void afegirProductes() throws ApplicationError, SQLException {
-
-        /**
-         *      Crear un nou producte amb les dades que ens digui l'operari
-         *      Agefir el producte a la BD (tenir en compte les diferents situacions que poden passar)
-         *          El producte ja existeix
-         *              - Mostrar el producte que té el mateix codiProducte
-         *              - Preguntar si es vol actualitzar o descartar l'operació
-         *          El producte no existeix
-         *              - Afegir el producte a la BD
-         *
-         *     Podeu fer-ho amb llenguatge SQL o mirant si el producte existeix i després inserir o actualitzar
-         */
-
-        System.out.println("""
-                DADES PRODUCTE:
-                ===============""");
-        String codi = Stdin.input("- Codi producte: ");
-        String nom = Stdin.input("- Nom: ");
-        String descripcio = Stdin.input("- Descripció: ");
-        float preuCompra = (float) Stdin.inputDouble("- Preu compra: ");
-        float preuVenda = (float) Stdin.inputDouble("- Preu venda: ");
-
-        Producte p = new Producte(codi, nom, descripcio, preuCompra, preuVenda);
-
-        Producte producteLlegit;
-
-        producteLlegit = producteDAO.readProducte(codi);
-
-        if (producteLlegit != null) {
-            System.out.println("""
-                    Producte ja existent. Què vols fer?
-                    """);
-            int opcio = Stdin.inputInt("""
-                    1 - Actualitzar
-                    2 - Descartar canvis
-                    """);
-
-            if (opcio == 2) {
-                return;
-            }
-
-            producteDAO.updateProducte(p);
-        }
-
-        //Demanem de guardar el producte p a la BD
-        producteDAO.createProducte(p);
-
-        //Agafem tots els productes de la BD i els mostrem (per comprovar que s'ha afegit)
-        ArrayList<Producte> productes = producteDAO.readProductes();
-
-        for (Producte prod : productes) {
-            System.out.println(prod);
-        }
-    }
-
-    private static void mostrarInventari() throws ApplicationError {
-
-        //Agafem tots els productes de la BD i els mostrem
-        ArrayList<Producte> productes = producteDAO.readProductes();
-        for (Producte prod : productes) {
-            System.out.println(prod);
-        }
-    }
-
-    private static void comprarProducte() throws ApplicationError {
-
-        /**
-         * Mínim: es realitza la compra indicant la posició on es troba el producte que es vol comprar
-         * Ampliació (0.5 punts): es permet entrar el NOM del producte per seleccionar-lo (abans cal mostrar els
-         * productes disponibles a la màquina)
-         *
-         * Tingueu en compte que quan s'ha venut un producte HA DE QUEDAR REFLECTIT a la BD que n'hi ha un menys.
-         * (stock de la màquina es manté guardat entre reinicis del programa)
-         */
-
-        // Mostrant a l'usuari els productes disponibles
-        mostrarMaquina();
-
-        // Demanant a l'usuari per un slot
-        int posicio = Stdin.inputInt("Introdueix la posicio del producte que vols comprar: ");
-        Slot slot;
-
-        // Llegint slot de la base de dades
-        slot = slotDAO.readSlot(posicio);
-        if (slot == null) {
-            System.out.printf("No hi ha un slot a la posicio: %d\n", posicio);
-            return;
-        }
-
-        // Comprovant que hi ha productes a aquest slot
-        if (slot.getQuantitat() < 1) {
-            System.out.println("No hi ha stock disponible.");
-            return;
-        }
-        // Reduint estoc
-        slot.setQuantitat(slot.getQuantitat() - 1);
-
-        // Actualitzant slot
-        slotDAO.updateSlot(slot);
-        System.out.println("Venda realitzada correctament.");
-
-        // Afegint producte comprat al llistat
-        Producte producteComprat;
-
-        producteComprat = producteDAO.readProducte(slot.getCodiProducte());
-
-        float benefici = producteComprat.getPreuVenta() - producteComprat.getPreuCompra();
-        beneficisDAO.createBenefici(benefici);
-    }
-
-    private static void mostrarMaquina() throws ApplicationError {
-
-        /** IMPORTANT **
-         * S'està demanat NOM DEL PRODUCTE no el codiProducte (la taula Slot conté posició, codiProducte i stock)
-         * també s'acceptarà mostrant només el codi producte, però comptarà menys.
-         *
-         * Posicio      Producte                Quantitat disponible
-         * ===========================================================
-         * 1            Patates 3D              8
-         * 2            Doritos Tex Mex         6
-         * 3            Coca-Cola Zero          10
-         * 4            Aigua 0.5L              7
-         */
-        ArrayList<Slot> slots;
-
-        slots = slotDAO.readSlots();
-
-        for (Slot slot : slots) {
-            Producte producte = producteDAO.readProducte(slot.getCodiProducte());
-            System.out.printf("%d   %s  %d\n", slot.getPosicio(), producte.getNom(), slot.getQuantitat());
-        }
-    }
-
-    private static void mostrarMenu() {
-        System.out.println("\nMenú de la màquina expenedora");
-        System.out.println("=============================");
-        System.out.println("Selecciona la operació a realitzar introduïnt el número corresponent: \n");
-
-
-        //Opcions per client / usuari
-        System.out.println("[1] Mostrar Posició / Nom producte / Stock de la màquina");
-        System.out.println("[2] Comprar un producte");
-
-        //Opcions per administrador / manteniment
-        System.out.println();
-        System.out.println("[10] Mostrar llistat productes disponibles (BD)");
-        System.out.println("[11] Afegir productes disponibles");
-        System.out.println("[12] Assignar productes / stock a la màquina");
-        System.out.println("[13] Mostrar benefici");
-
-        System.out.println();
-        System.out.println("[-1] Sortir de l'aplicació");
     }
 
     private static void mostrarBenefici() throws ApplicationError {
@@ -351,5 +378,25 @@ public class Application {
 
         float benefici = beneficisDAO.readBeneficis();
         System.out.printf("El benefici es de: %.2f\n", benefici);
+    }
+
+    private static void mostrarMenu() {
+        System.out.println("\nMenú de la màquina expenedora");
+        System.out.println("=============================");
+        System.out.println("Selecciona la operació a realitzar introduïnt el número corresponent: \n");
+
+        //Opcions per client / usuari
+        System.out.println("[1] Mostrar Posició / Nom producte / Stock de la màquina");
+        System.out.println("[2] Comprar un producte");
+
+        //Opcions per administrador / manteniment
+        System.out.println();
+        System.out.println("[10] Mostrar llistat productes disponibles (BD)");
+        System.out.println("[11] Afegir productes disponibles");
+        System.out.println("[12] Assignar productes / stock a la màquina");
+        System.out.println("[13] Mostrar benefici");
+
+        System.out.println();
+        System.out.println("[-1] Sortir de l'aplicació");
     }
 }

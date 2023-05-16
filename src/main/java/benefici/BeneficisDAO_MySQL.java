@@ -1,5 +1,6 @@
 package benefici;
 
+import shared.ApplicationError;
 import shared.InfrastructureError;
 
 import java.sql.*;
@@ -18,7 +19,7 @@ public class BeneficisDAO_MySQL implements BeneficisDAO {
 
 
     @Override
-    public void createBenefici(float benefici) throws InfrastructureError {
+    public void createBenefici(float benefici) throws ApplicationError {
         try {
             PreparedStatement ps = conn.prepareStatement(STATEMENT_INSERT);
 
