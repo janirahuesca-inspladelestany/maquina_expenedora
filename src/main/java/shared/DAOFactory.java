@@ -7,13 +7,30 @@ import producte.ProducteDAO_MySQL;
 import slot.SlotDAO;
 import slot.SlotDAO_MySQL;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+
 public class DAOFactory {
+
+    private static Connection conn;
+    private static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
+    private static final String DB_ROUTE = "jdbc:mysql://localhost:3306/expenedora";
+    private static final String DB_USER = "root";
+    private static final String DB_PWD = "1234";
     private static DAOFactory instance;
     private static ProducteDAO producteDAOinstance;
-    private static ProducteDAO slotDAOinstance;
-    private static ProducteDAO beneficisDAOinstance;
+    private static SlotDAO slotDAOinstance;
+    private static BeneficisDAO beneficisDAOinstance;
     private DAOFactory() {
-        // init ConnectionFactory
+        try {
+            Class.forName(DB_DRIVER); // Carreguem el driver
+            conn = DriverManager.getConnection(DB_ROUTE, DB_USER, DB_PWD); // Arranquem la connexió a la BDD
+            System.out.println("Connexió establerta satisfactòriament.");
+        } catch (Exception e) {
+            System.out.println("S'ha produït un error en intentar connectar amb la base de dades. Revisa els paràmetres.");
+            System.out.println(e);
+            return;
+        }
     }
     public static DAOFactory getInstance() {
         if (instance == null)
@@ -22,17 +39,17 @@ public class DAOFactory {
     }
     public ProducteDAO getProducteDAO() {
         if (producteDAOinstance == null)
-            producteDAOinstance = new ProducteDAO_MySQL();
+            producteDAOinstance = new ProducteDAO_MySQL(conn);
         return producteDAOinstance;
     }
     public SlotDAO getSlotDAO() {
         if (slotDAOinstance == null)
-            slotDAOinstance = new SlotDAO_MySQL();
-        return (SlotDAO) slotDAOinstance;
+            slotDAOinstance = new SlotDAO_MySQL(conn);
+        return slotDAOinstance;
     }
     public BeneficisDAO getBeneficisDAO() {
         if (beneficisDAOinstance == null)
-            beneficisDAOinstance = new BeneficisDAO_MySQL();
-        return (BeneficisDAO) beneficisDAOinstance;
+            beneficisDAOinstance = new BeneficisDAO_MySQL(conn);
+        return beneficisDAOinstance;
     }
 }
