@@ -2,6 +2,7 @@ package org.example;
 
 import benefici.BeneficisDAO;
 import producte.Producte;
+import shared.AppLogger;
 import shared.ApplicationError;
 import shared.DAOFactory;
 import shared.InfrastructureError;
@@ -18,6 +19,8 @@ public class Application {
     private static ProducteDAO producteDAO;
     private static SlotDAO slotDAO;
     private static BeneficisDAO beneficisDAO;
+    static AppLogger logger = AppLogger.getInstance();
+
 
     public static void main(String[] args) {
 
@@ -69,10 +72,9 @@ public class Application {
                         System.out.println("Opció no vàlida");
                 }
             } catch (ApplicationError error) {
-                System.out.println(error.message);
+                logger.error(error.message);
             } catch (Exception exception) {
-                System.out.println("Unexpected exception");
-                exception.printStackTrace();
+                logger.error(exception.getMessage());
                 return;
             }
         } while (opcio != -1);
@@ -133,7 +135,7 @@ public class Application {
 
         // Actualitzem el slot (perquè quedi constància del nou estoc):
         slotDAO.updateSlot(slot);
-        System.out.println("Venda realitzada correctament.");
+        logger.info("Venda realitzada correctament.");
 
         // Afegim els beneficis obtinguts pel producte venut (preu venda - preu compra):
         Producte producteComprat;
