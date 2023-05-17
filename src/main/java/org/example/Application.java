@@ -52,7 +52,6 @@ public class Application {
                     case 2:
                         comprarProducte();
                         break;
-
                     case 10:
                         mostrarInventari();
                         break;
@@ -173,7 +172,7 @@ public class Application {
      * @throws ApplicationError
      * @throws SQLException
      */
-    private static void afegirProductes() throws ApplicationError, SQLException {
+    private static void afegirProductes() throws ApplicationError {
 
         // Demanem els diferents camps que componen un producte:
         System.out.println("""
