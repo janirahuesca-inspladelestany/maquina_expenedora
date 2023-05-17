@@ -119,8 +119,7 @@ public class Application {
 
         // Ens assegurem que el slot existeix:
         if (slot == null) {
-
-            System.out.printf("No hi ha un slot a la posicio: %d\n", posicio);
+            System.out.println("No hi ha un slot a la posició indicada.");
             return;
         }
 
@@ -189,15 +188,18 @@ public class Application {
 
             // Si tria descartar els canvis, sortim del mètode:
             if (opcio == 2) {
+                logger.info("S'han descartat els canvis.");
                 return;
             }
 
             // Si tria actualitzar el producte, realitzem la operació:
             producteDAO.updateProducte(p);
+            logger.info("S'ha actualitzat el producte.");
         }
 
         // Guardem el producte p a la BD:
         producteDAO.createProducte(p);
+        logger.info("Producte afegit correctament a la BDD.");
 
         // Agafem tots els productes de la BD i els mostrem (per comprovar que s'ha afegit):
         ArrayList<Producte> productes = producteDAO.readProductes();
@@ -233,12 +235,12 @@ public class Application {
                 MODIFICAR MAQUINA:
                 ===============
                 1. Modificar posicions
-                2. Modificar stock
+                2. Modificar estoc
                 3. Afegir slots""");
 
         switch (opcio) {
             case 1 -> modificarPosicions();
-            case 2 -> modificarStock();
+            case 2 -> modificarEstoc();
             case 3 -> afegirSlots();
             default -> System.out.println("Opcio no valida");
         }
@@ -282,14 +284,14 @@ public class Application {
         slotDAO.updateSlot(slot1);
         slotDAO.updateSlot(slot2);
 
-        System.out.println("Posicions intercanviades correctament.");
+        logger.info("Posicions intercanviades correctament.");
     }
 
     /**
      *  Mètode que permet modificar l'estoc d'un producte que hi ha a la màquina
      * @throws ApplicationError
      */
-    private static void modificarStock() throws ApplicationError {
+    private static void modificarEstoc() throws ApplicationError {
 
         // Mostrem informació de la màquina expenedora:
         mostrarMaquina();
@@ -315,6 +317,7 @@ public class Application {
 
         // Actualitzem la informació del slot:
         slotDAO.updateSlot(slot);
+        logger.info("Estoc modificat correctament.");
     }
 
     /**
@@ -347,6 +350,7 @@ public class Application {
 
         // Si no existeix, creem el slot:
         slotDAO.createSlot(s);
+        logger.info("Slot afegit correctament.");
     }
 
     private static void mostrarBenefici() throws ApplicationError {
