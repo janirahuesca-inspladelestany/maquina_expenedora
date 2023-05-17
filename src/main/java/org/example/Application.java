@@ -92,9 +92,10 @@ public class Application {
         slots = slotDAO.readSlots();
 
         // Per cada slot, mostrem la informació (accedint al nom del producte gràcies a la creació i lectura del producte):
+        System.out.printf("%-10s%-30s%-10s\n", "POSICIÓ", "NOM PRODUCTE", "QUANTITAT");
         for (Slot slot : slots) {
             Producte producte = producteDAO.readProducte(slot.getCodiProducte());
-            System.out.printf("%d\t%s\t%d\n", slot.getPosicio(), producte.getNom(), slot.getQuantitat());
+            System.out.printf("%-10d%-30s%-10d\n", slot.getPosicio(), producte.getNom(), slot.getQuantitat());
         }
     }
 
@@ -143,6 +144,22 @@ public class Application {
 
         float benefici = producteComprat.getPreuVenta() - producteComprat.getPreuCompra();
         beneficisDAO.createBenefici(benefici);
+    }
+
+    /**
+     * Mètode per mostrar la informació dels productes que tenim, i així conèixer l'inventari (productes i quantitat
+     * que tenim).
+     * @throws ApplicationError
+     */
+    private static void mostrarInventari() throws ApplicationError {
+
+        // Agafem tots els productes de la BD i els mostrem:
+        System.out.println("INVENTARI DE LA MÀQUINA:");
+        System.out.println("========================");
+        ArrayList<Producte> productes = producteDAO.readProductes();
+        for (Producte prod : productes) {
+            System.out.println(prod);
+        }
     }
 
     /**
@@ -210,20 +227,6 @@ public class Application {
     }
 
     /**
-     * Mètode per mostrar la informació dels productes que tenim, i així conèixer l'inventari (productes i quantitat
-     * que tenim).
-     * @throws ApplicationError
-     */
-    private static void mostrarInventari() throws ApplicationError {
-
-        // Agafem tots els productes de la BD i els mostrem:
-        ArrayList<Producte> productes = producteDAO.readProductes();
-        for (Producte prod : productes) {
-            System.out.println(prod);
-        }
-    }
-
-    /**
      * Mètode que permet modificar aspectes de la màquina expenedora. Per cadascun d'aquests aspectes s'han creat
      * submètodes, un per cada funcionalitat. Es mostra a l'usuari les opcions que pot fer, i amb un switch s'assigna
      * la opció triada per l'usuari al mètode corresponent.
@@ -233,7 +236,7 @@ public class Application {
 
         int opcio = Stdin.inputInt("""
                 MODIFICAR MAQUINA:
-                ===============
+                ==================
                 1. Modificar posicions
                 2. Modificar estoc
                 3. Afegir slots""");
