@@ -267,9 +267,18 @@ public class Application {
         Slot slot1;
         Slot slot2;
 
-        // Llegim les dades que hi ha a cada slot:
+        // Llegim les dades que hi ha a cada slot i ens assegurem que el slots existeixen:
         slot1 = slotDAO.readSlot(posicioSlot1);
+        if (slot1 == null) {
+            System.out.printf("No hi ha un slot a la posició %d.", posicioSlot1);
+            return;
+        }
+
         slot2 = slotDAO.readSlot(posicioSlot2);
+        if (slot2 == null) {
+            System.out.printf("No hi ha un slot a la posició %d.", posicioSlot2);
+            return;
+        }
 
         // Assignem a posició auxiliar la posició que té el slot1:
         posicioAux = slot1.getPosicio();
@@ -299,21 +308,26 @@ public class Application {
         // Mostrem informació de la màquina expenedora:
         mostrarMaquina();
 
-        // Demanem a l'usuari el eslot del qual vol modificar l'estoc:
+        // Demanem a l'usuari el slot del qual vol modificar l'estoc:
         int posicio = Stdin.inputInt("Introdueix el slot: ");
-        Slot slot;
+
+        // Llegim el slot
+        Slot slot = slotDAO.readSlot(posicio);
+
+        // Ens assegurem que el slot existeix:
+        if (slot == null) {
+            System.out.println("No hi ha un slot a la posició indicada.");
+            return;
+        }
 
         // Demanem a l'usuari el nou estoc que vol assignar al slot:
         int stock = Stdin.inputInt("Introdueix el nou stock: ");
 
         // Si ens vol introduïr un valor menor a 1, mostrem un missatge i sortim del mètode
         if (stock < 1) {
-            System.out.println("El stock no és valid");
+            System.out.println("El stock no és valid.");
             return;
         }
-
-        // Si l'estoc introduït és vàlid, llegim el slot:
-        slot = slotDAO.readSlot(posicio);
 
         // Li assignem la nova quantitat (estoc demanat):
         slot.setQuantitat(stock);
@@ -327,7 +341,11 @@ public class Application {
      * Mètode que permet afegir més ranures (slots) a la màquina
      * @throws InfrastructureError
      */
-    private static void afegirSlots() throws InfrastructureError {
+    private static void afegirSlots() throws ApplicationError {
+
+        // Mostrem tant la informació de la màquina com la dels productes, per ajudar a l'operari a decidir quin producte afegir:
+        mostrarBenefici();
+        mostrarInventari();
 
         // Demanem les dades dels diferents camps que composen un slot, i les assignem a les variables corresponents:
         System.out.println("""
@@ -336,7 +354,7 @@ public class Application {
                 """);
         int posicio = Stdin.inputInt("- Posició: ");
         int quantitat = Stdin.inputInt("- Quantitat (unitats x producte): ");
-        String codi_producte = Stdin.input("Codi producte: ");
+        String codi_producte = Stdin.input("- Codi producte: ");
 
         // Creem un nou slot amb les dades sol·licitades:
         Slot s = new Slot(posicio, quantitat, codi_producte);
