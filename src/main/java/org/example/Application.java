@@ -26,7 +26,6 @@ public class Application {
 
         /* TODO (COSES A MIRAR):
         - Fitxer d'escriptura on guardar el logging(encara que s'actualitzi cada vegada que executes el programa)
-        - Connection poll de JBDC
         - Que els DAO guardin en caché la info amb hashmap (codi_producte - objecte producte), i només accedir a la BDD
         per INSERT, UPDATE O DELETE).
         */
