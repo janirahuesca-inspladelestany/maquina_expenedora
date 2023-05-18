@@ -208,7 +208,7 @@ public class Application {
                 ==================
                 1. Modificar posicions
                 2. Modificar estoc
-                3. Afegir slots""");
+                3. Afegir slots\n""");
 
         switch (opcio) {
             case 1 -> modificarPosicions();
