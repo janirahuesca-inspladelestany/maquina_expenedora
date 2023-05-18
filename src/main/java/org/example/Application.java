@@ -7,6 +7,7 @@ import shared.ApplicationError;
 import shared.DAOFactory;
 import shared.InfrastructureError;
 import slot.AfegirSlotAccio;
+import slot.ModificarEstocAccio;
 import slot.Slot;
 import producte.ProducteDAO;
 import slot.SlotDAO;
@@ -310,29 +311,11 @@ public class Application {
         // Demanem a l'usuari el slot del qual vol modificar l'estoc:
         int posicio = Stdin.inputInt("Introdueix el slot: ");
 
-        // Llegim el slot
-        Slot slot = slotDAO.readSlot(posicio);
-
-        // Ens assegurem que el slot existeix:
-        if (slot == null) {
-            System.out.println("No hi ha un slot a la posició indicada.");
-            return;
-        }
-
         // Demanem a l'usuari el nou estoc que vol assignar al slot:
         int stock = Stdin.inputInt("Introdueix el nou stock: ");
 
-        // Si ens vol introduïr un valor menor a 1, mostrem un missatge i sortim del mètode
-        if (stock < 1) {
-            System.out.println("El stock no és valid.");
-            return;
-        }
+        ModificarEstocAccio.run(slotDAO, posicio, stock);
 
-        // Li assignem la nova quantitat (estoc demanat):
-        slot.setQuantitat(stock);
-
-        // Actualitzem la informació del slot:
-        slotDAO.updateSlot(slot);
         logger.info("Estoc modificat correctament.");
     }
 
