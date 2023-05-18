@@ -6,6 +6,7 @@ import shared.AppLogger;
 import shared.ApplicationError;
 import shared.DAOFactory;
 import shared.InfrastructureError;
+import slot.AfegirSlotAccio;
 import slot.Slot;
 import producte.ProducteDAO;
 import slot.SlotDAO;
@@ -340,7 +341,6 @@ public class Application {
      * @throws InfrastructureError
      */
     private static void afegirSlots() throws ApplicationError {
-
         // Mostrem tant la informació de la màquina com la dels productes, per ajudar a l'operari a decidir quin producte afegir:
         mostrarBenefici();
         mostrarInventari();
@@ -354,21 +354,9 @@ public class Application {
         int quantitat = Stdin.inputInt("- Quantitat (unitats x producte): ");
         String codi_producte = Stdin.input("- Codi producte: ");
 
-        // Creem un nou slot amb les dades sol·licitades:
-        Slot s = new Slot(posicio, quantitat, codi_producte);
+        Slot slotPerAfegir = new Slot(posicio, quantitat, codi_producte);
 
-        // Creem un slot auxiliar i li assignem el valor del nou slot que hem creat
-        Slot slotLlegit;
-        slotLlegit = slotDAO.readSlot(posicio);
-
-        // Comprovem si el slot que es vol crear ja existeix. Si ja existeix, informem a l'usuari i sortim del mètode.
-        if (slotLlegit != null) {
-            System.out.println("Aquest slot ja existeix.");
-            return;
-        }
-
-        // Si no existeix, creem el slot:
-        slotDAO.createSlot(s);
+        AfegirSlotAccio.run(slotDAO, slotPerAfegir);
         logger.info("Slot afegit correctament.");
     }
 
