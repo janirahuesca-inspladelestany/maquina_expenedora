@@ -71,7 +71,10 @@ public class Application {
                 }
             } catch (ApplicationError error) {
                 logger.error(error.message);
-                logger.debug(error.getMetadata());
+                var metadata = error.getMetadata();
+                if (metadata != null) {
+                    logger.debug(metadata);
+                }
             } catch (Exception exception) {
                 logger.error(exception.getMessage());
                 return;
