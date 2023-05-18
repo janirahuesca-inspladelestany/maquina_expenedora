@@ -1,5 +1,6 @@
 package producte;
 
+import shared.ApplicationError;
 import shared.InfrastructureError;
 
 import java.sql.*;
@@ -21,7 +22,7 @@ public class ProducteDAO_MySQL implements ProducteDAO {
     }
 
     @Override
-    public void createProducte(Producte p) throws InfrastructureError {
+    public void createProducte(Producte p) throws ApplicationError {
         try {
             PreparedStatement ps = conn.prepareStatement(STATEMENT_INSERT);
 
@@ -38,7 +39,7 @@ public class ProducteDAO_MySQL implements ProducteDAO {
     }
 
     @Override
-    public Producte readProducte(String codiProducte) throws InfrastructureError {
+    public Producte readProducte(String codiProducte) throws ApplicationError {
         try {
             PreparedStatement ps = conn.prepareStatement(STATEMENT_SELECT_ONE_ITEM);
             ps.setString(1, codiProducte);
@@ -60,7 +61,7 @@ public class ProducteDAO_MySQL implements ProducteDAO {
     }
 
     @Override
-    public ArrayList<Producte> readProductes() throws InfrastructureError {
+    public ArrayList<Producte> readProductes() throws ApplicationError {
         ArrayList<Producte> llistaProductes = new ArrayList<Producte>(); //Llista per guardar els productes que es retornin de la consulta
         try {
             PreparedStatement ps = conn.prepareStatement(STATEMENT_SELECT_ALL); //Serveix per fer una consulta
@@ -81,7 +82,7 @@ public class ProducteDAO_MySQL implements ProducteDAO {
     }
 
     @Override
-    public void updateProducte(Producte p) throws InfrastructureError {
+    public void updateProducte(Producte p) throws ApplicationError {
         try {
             PreparedStatement ps = conn.prepareStatement(STATEMENT_UDPATE);
             ps.setString(1, p.getNom());

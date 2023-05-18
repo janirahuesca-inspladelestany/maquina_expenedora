@@ -1,5 +1,6 @@
 package slot;
 
+import shared.ApplicationError;
 import shared.InfrastructureError;
 
 import java.sql.*;
@@ -19,7 +20,7 @@ public class SlotDAO_MySQL implements SlotDAO {
     }
 
     @Override
-    public void createSlot(Slot s) throws InfrastructureError {
+    public void createSlot(Slot s) throws ApplicationError {
         try {
             PreparedStatement ps = conn.prepareStatement(STATEMENT_INSERT);
 
@@ -34,7 +35,7 @@ public class SlotDAO_MySQL implements SlotDAO {
     }
 
     @Override
-    public Slot readSlot(int posicio) throws InfrastructureError {
+    public Slot readSlot(int posicio) throws ApplicationError {
         try {
             PreparedStatement ps = conn.prepareStatement(STATEMENT_SELECT_ONE_ITEM);
             ps.setInt(1, posicio);
@@ -54,7 +55,7 @@ public class SlotDAO_MySQL implements SlotDAO {
     }
 
     @Override
-    public ArrayList<Slot> readSlots() throws InfrastructureError {
+    public ArrayList<Slot> readSlots() throws ApplicationError {
         ArrayList<Slot> llistaSlots = new ArrayList<Slot>(); //Llista per guardar els slots que es retornin de la consulta
         try {
             PreparedStatement ps = conn.prepareStatement(STATEMENT_SELECT_ALL); //Serveix per fer una consulta
@@ -73,7 +74,7 @@ public class SlotDAO_MySQL implements SlotDAO {
     }
 
     @Override
-    public void updateSlot(Slot s) throws InfrastructureError {
+    public void updateSlot(Slot s) throws ApplicationError {
         try {
             PreparedStatement ps = conn.prepareStatement(STATEMENT_UDPATE);
             ps.setInt(1, s.getQuantitat());
@@ -86,7 +87,7 @@ public class SlotDAO_MySQL implements SlotDAO {
     }
 
     @Override
-    public Slot deleteSlot(Slot s) throws InfrastructureError {
+    public Slot deleteSlot(Slot s) throws ApplicationError {
         try {
             PreparedStatement ps = conn.prepareStatement(STATEMENT_DELETE);
             ps.setInt(1, s.getPosicio());

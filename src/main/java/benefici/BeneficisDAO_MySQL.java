@@ -31,7 +31,7 @@ public class BeneficisDAO_MySQL implements BeneficisDAO {
     }
 
     @Override
-    public float readBeneficis() throws InfrastructureError {
+    public float readBeneficis() throws ApplicationError {
         try {
             PreparedStatement ps = conn.prepareStatement(STATEMENT_SUM_BENEFICIS);
             ResultSet rs = ps.executeQuery();  //Serveix per executar la consulta i guardar-la a un ResultSet que guarda un conjunt de dades
