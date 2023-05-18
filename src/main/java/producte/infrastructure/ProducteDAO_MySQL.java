@@ -94,7 +94,7 @@ public class ProducteDAO_MySQL implements ProducteDAO {
             ps.setString(5, p.getCodiProducte());
             int rowCount = ps.executeUpdate();
         } catch (SQLException exception) {
-            throw new InfrastructureError("Error actualitzant producte de la base de dades.");
+            throw new InfrastructureError("Error actualitzant producte de la base de dades.").withMetadata(exception);
         }
     }
 

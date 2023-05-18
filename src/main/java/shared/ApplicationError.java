@@ -6,8 +6,9 @@ public abstract class ApplicationError extends Exception {
 
     private Object metadata;
 
-    public void withMetadata(Object metadata) {
+    public ApplicationError withMetadata(Object metadata) {
         this.metadata = metadata;
+        return this;
     }
 
     public Object getMetadata() {

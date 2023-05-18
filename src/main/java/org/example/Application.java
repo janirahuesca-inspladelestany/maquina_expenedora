@@ -71,6 +71,7 @@ public class Application {
                 }
             } catch (ApplicationError error) {
                 logger.error(error.message);
+                logger.debug(error.getMetadata());
             } catch (Exception exception) {
                 logger.error(exception.getMessage());
                 return;
