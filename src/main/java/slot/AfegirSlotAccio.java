@@ -9,7 +9,7 @@ public class AfegirSlotAccio {
 
         // Comprovem si el slot que es vol crear ja existeix. Si ja existeix, informem a l'usuari i sortim del mètode.
         if (slotLlegit != null) {
-            throw new SlotExistentError(String.format("La posicio %d ja esta ocupada\n", slotPerAfegir.getPosicio()));
+            throw new SlotExistentError(String.format("La posicio %d ja esta ocupada", slotPerAfegir.getPosicio()));
         }
 
         // Si no existeix, creem el slot:
