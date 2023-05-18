@@ -1,6 +1,9 @@
-package slot;
+package slot.application;
 
 import shared.ApplicationError;
+import slot.domain.Slot;
+import slot.domain.SlotDAO;
+import slot.domain.SlotNoTrobatError;
 
 public class ModificarPosicioAccio {
     public static void run(SlotDAO slotDAO, int posicio1, int posicio2) throws ApplicationError {

@@ -1,4 +1,4 @@
-package slot;
+package slot.domain;
 
 import shared.ApplicationError;
 import shared.ErrorCode;

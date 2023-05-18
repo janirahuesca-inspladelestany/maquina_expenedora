@@ -1,4 +1,4 @@
-package producte;
+package producte.domain;
 
 import shared.ApplicationError;
 import shared.ErrorCode;

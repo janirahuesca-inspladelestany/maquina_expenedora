@@ -1,4 +1,4 @@
-package benefici;
+package benefici.domain;
 
 import shared.ApplicationError;
 import shared.InfrastructureError;

@@ -1,7 +1,6 @@
-package slot;
+package slot.domain;
 
 import shared.ApplicationError;
-import shared.InfrastructureError;
 
 import java.util.ArrayList;
 

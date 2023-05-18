@@ -1,7 +1,6 @@
-package producte;
+package producte.domain;
 
 import shared.ApplicationError;
-import shared.InfrastructureError;
 
 import java.util.ArrayList;
 

@@ -1,5 +1,7 @@
-package producte;
+package producte.infrastructure;
 
+import producte.domain.Producte;
+import producte.domain.ProducteDAO;
 import shared.ApplicationError;
 import shared.InfrastructureError;
 

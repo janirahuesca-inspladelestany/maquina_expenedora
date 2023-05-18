@@ -1,6 +1,10 @@
-package slot;
+package slot.application;
 
 import shared.ApplicationError;
+import slot.domain.EstocInvalidError;
+import slot.domain.Slot;
+import slot.domain.SlotDAO;
+import slot.domain.SlotNoTrobatError;
 
 public class ModificarEstocAccio {
     public static void run(SlotDAO slotDAO, int posicio, int stock) throws ApplicationError {

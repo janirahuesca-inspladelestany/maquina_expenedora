@@ -1,16 +1,20 @@
 package shared;
 
-import benefici.BeneficisDAO;
-import benefici.BeneficisDAO_MySQL;
-import producte.ProducteDAO;
-import producte.ProducteDAO_MySQL;
-import slot.SlotDAO;
-import slot.SlotDAO_MySQL;
+import benefici.domain.BeneficisDAO;
+import benefici.infrastructure.BeneficisDAO_MySQL;
+import producte.domain.ProducteDAO;
+import producte.infrastructure.ProducteDAO_MySQL;
+import slot.domain.SlotDAO;
+import slot.infrastructure.SlotDAO_MySQL;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 
 public class DAOFactory {
+
+    public static Connection getConn() {
+        return conn;
+    }
 
     private static Connection conn;
     private static final String DB_DRIVER = "com.mysql.cj.jdbc.Driver";

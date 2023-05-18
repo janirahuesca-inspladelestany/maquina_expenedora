@@ -1,7 +1,9 @@
-package slot;
+package slot.infrastructure;
 
 import shared.ApplicationError;
 import shared.InfrastructureError;
+import slot.domain.Slot;
+import slot.domain.SlotDAO;
 
 import java.sql.*;
 import java.util.ArrayList;

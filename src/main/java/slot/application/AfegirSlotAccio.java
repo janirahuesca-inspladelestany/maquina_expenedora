@@ -1,6 +1,9 @@
-package slot;
+package slot.application;
 
 import shared.ApplicationError;
+import slot.domain.Slot;
+import slot.domain.SlotDAO;
+import slot.domain.SlotExistentError;
 
 public class AfegirSlotAccio {
     public static void run(SlotDAO slotDAO, Slot slotPerAfegir) throws ApplicationError {

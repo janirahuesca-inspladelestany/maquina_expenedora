@@ -1,5 +1,6 @@
-package benefici;
+package benefici.infrastructure;
 
+import benefici.domain.BeneficisDAO;
 import shared.ApplicationError;
 import shared.InfrastructureError;
 

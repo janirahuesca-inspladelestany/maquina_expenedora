@@ -1,4 +1,4 @@
-package producte;
+package producte.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

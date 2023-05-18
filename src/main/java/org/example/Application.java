@@ -1,20 +1,29 @@
 package org.example;
 
-import benefici.BeneficisDAO;
-import producte.Producte;
+import benefici.domain.BeneficisDAO;
+import producte.application.AfegirProducteAccio;
+import producte.domain.Producte;
+import producte.domain.ProducteExistentError;
 import shared.AppLogger;
 import shared.ApplicationError;
 import shared.DAOFactory;
 import shared.InfrastructureError;
-import slot.*;
-import producte.ProducteDAO;
+import shared.utils.Stdout;
+import producte.domain.ProducteDAO;
 import shared.utils.Stdin;
+import slot.application.AfegirSlotAccio;
+import slot.application.ComprarProducteAccio;
+import slot.application.ModificarEstocAccio;
+import slot.application.ModificarPosicioAccio;
+import slot.domain.Slot;
+import slot.domain.SlotDAO;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Application {
-    private static DAOFactory daoFactory;
+    private static DAOFactory daoFactory = DAOFactory.getInstance();
     private static ProducteDAO producteDAO;
     private static SlotDAO slotDAO;
     private static BeneficisDAO beneficisDAO;
@@ -22,20 +31,12 @@ public class Application {
 
 
     public static void main(String[] args) {
-
-        /* TODO (COSES A MIRAR):
-        - Fitxer d'escriptura on guardar el logging(encara que s'actualitzi cada vegada que executes el programa)
-        - Que els DAO guardin en caché la info amb hashmap (codi_producte - objecte producte), i només accedir a la BDD
-        per INSERT, UPDATE O DELETE).
-        */
-
         // Inicialització dels DAO:
-        daoFactory = DAOFactory.getInstance();
-        producteDAO = DAOFactory.getInstance().getProducteDAO();
-        slotDAO = DAOFactory.getInstance().getSlotDAO();
-        beneficisDAO = DAOFactory.getInstance().getBeneficisDAO();
+        producteDAO = daoFactory.getProducteDAO();
+        slotDAO = daoFactory.getSlotDAO();
+        beneficisDAO = daoFactory.getBeneficisDAO();
 
-        Scanner lector = new Scanner(System.in);            //TODO: passar Scanner a una classe InputHelper
+        Scanner lector = new Scanner(System.in);
         int opcio = 0;
 
         do {
@@ -75,6 +76,13 @@ public class Application {
                 return;
             }
         } while (opcio != -1);
+
+        try {
+            DAOFactory.getConn().close();
+        } catch (Exception exception) {
+            logger.error("Error closing database connection");
+            logger.error(exception.getMessage());
+        }
     }
 
     /**
@@ -102,45 +110,15 @@ public class Application {
      * @throws ApplicationError
      */
     private static void comprarProducte() throws ApplicationError {
-
-        // TODO: Ampliació (0.5 punts): es permet entrar el NOM del producte per seleccionar-lo (abans cal mostrar els productes disponibles a la màquina)
-
         // Mostrem a l'usuari els productes disponibles:
         mostrarMaquina();
 
         // Demanem a l'usuari per un slot:
         int posicio = Stdin.inputInt("Introdueix la posicio del producte que vols comprar: ");
-        Slot slot;
 
-        // Llegim el slot de la base de dades:
-        slot = slotDAO.readSlot(posicio);
+        ComprarProducteAccio.run(slotDAO, producteDAO, beneficisDAO, posicio);
 
-        // Ens assegurem que el slot existeix:
-        if (slot == null) {
-            System.out.println("No hi ha un slot a la posició indicada.");
-            return;
-        }
-
-        // Comprovem que hi ha productes a aquest slot:
-        if (slot.getQuantitat() < 1) {
-            System.out.println("No hi ha stock disponible.");
-            return;
-        }
-
-        // Reduïm l'estoc del producte:
-        slot.setQuantitat(slot.getQuantitat() - 1);
-
-        // Actualitzem el slot (perquè quedi constància del nou estoc):
-        slotDAO.updateSlot(slot);
         logger.info("Venda realitzada correctament.");
-
-        // Afegim els beneficis obtinguts pel producte venut (preu venda - preu compra):
-        Producte producteComprat;
-
-        producteComprat = producteDAO.readProducte(slot.getCodiProducte());
-
-        float benefici = producteComprat.getPreuVenta() - producteComprat.getPreuCompra();
-        beneficisDAO.createBenefici(benefici);
     }
 
     /**
@@ -185,16 +163,11 @@ public class Application {
         // Creem un nou producte amb les dades sol·licitades:
         Producte p = new Producte(codi, nom, descripcio, preuCompra, preuVenda);
 
-        // Creem un producte auxiliar i li assignem el valor del nou producte que hem creat
-        Producte producteLlegit;
-        producteLlegit = producteDAO.readProducte(codi);
-
-        // Comprovem si el sproducte que es vol crear ja existeix. ç
-        // Si ja existeix, informem a l'usuari i donem a triar dues opcions (actualitzar el producte o descartar els canvis):
-        if (producteLlegit != null) {
-            System.out.println("""
-                    Producte ja existent. Què vols fer?
-                    """);
+        try {
+            AfegirProducteAccio.run(producteDAO, p);
+        } catch (ProducteExistentError error) {
+            System.out.println(error.message);
+            System.out.println("Què vols fer?");
             int opcio = Stdin.inputInt("""
                     1 - Actualitzar
                     2 - Descartar canvis
@@ -209,18 +182,13 @@ public class Application {
             // Si tria actualitzar el producte, realitzem la operació:
             producteDAO.updateProducte(p);
             logger.info("S'ha actualitzat el producte.");
+            return;
         }
 
-        // Guardem el producte p a la BD:
-        producteDAO.createProducte(p);
         logger.info("Producte afegit correctament a la BDD.");
-
         // Agafem tots els productes de la BD i els mostrem (per comprovar que s'ha afegit):
         ArrayList<Producte> productes = producteDAO.readProductes();
-
-        for (Producte prod : productes) {
-            System.out.println(prod);
-        }
+        Stdout.showArray(productes.toArray());
     }
 
     /**
