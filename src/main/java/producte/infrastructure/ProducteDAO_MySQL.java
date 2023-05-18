@@ -15,8 +15,8 @@ public class ProducteDAO_MySQL implements ProducteDAO {
     private static final String STATEMENT_SELECT_ALL = "SELECT * FROM producte";
     private static final String STATEMENT_INSERT = "INSERT INTO producte VALUES (?,?,?,?,?)";
     private static final String STATEMENT_DELETE = "DELETE FROM producte WHERE codi_producte=?";
-    private static final String STATEMENT_UDPATE = "UPDATE producte SET codi_producte=?, nom=?, descripcio=?, " +
-            "preu_compra=?, preu_venta=? WHERE codi_producte=?";
+    private static final String STATEMENT_UPDATE = """
+            UPDATE producte SET nom=?, descripcio=?,preu_compra=?, preu_venta=? WHERE codi_producte=?""";
 
 
     public ProducteDAO_MySQL(Connection connection) {
@@ -86,7 +86,7 @@ public class ProducteDAO_MySQL implements ProducteDAO {
     @Override
     public void updateProducte(Producte p) throws ApplicationError {
         try {
-            PreparedStatement ps = conn.prepareStatement(STATEMENT_UDPATE);
+            PreparedStatement ps = conn.prepareStatement(STATEMENT_UPDATE);
             ps.setString(1, p.getNom());
             ps.setString(2, p.getDescripcio());
             ps.setFloat(3, p.getPreuCompra());

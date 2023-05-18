@@ -1,3 +1,6 @@
 2023-05-18 19:16:09 INFO  shared.AppLogger - Venda realitzada correctament.
 2023-05-18 19:18:56 ERROR shared.AppLogger - No hi ha un slot a la posició 9.
 2023-05-18 19:20:28 ERROR shared.AppLogger - No hi ha un slot a la posició 9.
+2023-05-18 21:55:37 ERROR shared.AppLogger - Error actualitzant producte de la base de dades.
+2023-05-18 21:55:37 DEBUG shared.AppLogger - java.sql.SQLException: No value specified for parameter 6
+2023-05-18 21:59:20 INFO  shared.AppLogger - S'ha actualitzat el producte.
