@@ -279,25 +279,16 @@ public class Application {
         logger.info("Slot afegit correctament.");
     }
 
+    /**
+     * Mètode que mostra el benefici de la sessió actual de la màquina (suma de la diferència de preu resta de preu
+     * venda - preu compra). Cada vegada que es fa efectiva una compra, es crida al mètode createBenefici(),
+     * que inserta un nou registre a la taula benefici.
+     * @throws ApplicationError
+     */
     private static void mostrarBenefici() throws ApplicationError {
 
-        /** Ha de mostrar el benefici de la sessió actual de la màquina, cada producte té un cost de compra
-         * i un preu de venda. La suma d'aquesta diferència de tots productes que s'han venut ens donaran el benefici.
-         *
-         * Simplement s'ha de donar el benefici actual des de l'últim cop que s'ha engegat la màquina. (es pot fer
-         * amb un comptador de benefici que s'incrementa per cada venda que es fa)
-         */
-
-        /** AMPLIACIÓ **
-         * En entrar en aquest menú ha de permetre escollir entre dues opcions: veure el benefici de la sessió actual o
-         * tot el registre de la màquina.
-         *
-         * S'ha de crear una nova taula a la BD on es vagi realitzant un registre de les vendes o els beneficis al
-         * llarg de la vida de la màquina.
-         */
-
         float benefici = beneficisDAO.readBeneficis();
-        System.out.printf("El benefici es de: %.2f\n", benefici);
+        System.out.printf("El benefici és de: %.2f\n", benefici);
     }
 
     private static void mostrarMenu() {
